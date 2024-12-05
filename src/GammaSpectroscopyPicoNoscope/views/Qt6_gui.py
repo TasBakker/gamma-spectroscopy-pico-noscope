@@ -596,7 +596,7 @@ class UserInterface(QtWidgets.QMainWindow):
         channel_counts = []
 
         for channel in "A", "B":
-            box = getattr(self, f"ch_{channel}_enabled_box")
+            box = getattr(self.ui, f"ch_{channel}_enabled_box")
             if box.isChecked():
                 n, _ = np.histogram(self._pulseheights[channel], bins=bins)
                 channel_counts.append(n)
