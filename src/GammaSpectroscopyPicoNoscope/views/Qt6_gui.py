@@ -9,13 +9,16 @@ import time
 import numpy as np
 from pkg_resources import resource_filename
 
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore, QtGui
 import pyqtgraph as pg
 
-from Qt6_main_ui import Ui_MainWindow
+from GammaSpectroscopyPicoNoscope.views.Qt6_main_ui import Ui_MainWindow
 
-from gamma_spectroscopy.models.picoscope_5000a import PicoScope5000A, INPUT_RANGES
-from gamma_spectroscopy.models.fake_picoscope import FakePicoScope
+from GammaSpectroscopyPicoNoscope.controllers.picoscope_5000a import (
+    PicoScope5000A,
+    INPUT_RANGES,
+)
+from GammaSpectroscopyPicoNoscope.controllers.fake_picoscope import FakePicoScope
 
 
 GUIDE_COLORS = {
@@ -67,9 +70,9 @@ class UserInterface(QtWidgets.QMainWindow):
 
     COUPLING = ["AC", "DC"]
 
-    start_run_signal = QtCore.pyqtSignal()
-    new_data_signal = QtCore.pyqtSignal()
-    plot_data_signal = QtCore.pyqtSignal(dict)
+    start_run_signal = QtCore.Signal()
+    new_data_signal = QtCore.Signal()
+    plot_data_signal = QtCore.Signal(dict)
 
     run_timer = QtCore.QTimer(interval=1000)
 
@@ -131,7 +134,7 @@ class UserInterface(QtWidgets.QMainWindow):
         pg.setConfigOption("foreground", "w")
         pg.setConfigOption("antialias", True)
 
-        ui_path = resource_filename("gamma_spectroscopy", "gamma_spectroscopy_gui.ui")
+        ui_path = resource_filename("GammaSpectroscopyPicoNoscope", "Qt6_ui.ui")
         self.ui = Ui_MainWindow()
         layout = self.ui
         layout.setupUi(self)
@@ -139,11 +142,11 @@ class UserInterface(QtWidgets.QMainWindow):
         # Menubar
         menubar = QtWidgets.QMenuBar()
 
-        export_spectrum_action = QtWidgets.QAction("&Export spectrum", self)
+        export_spectrum_action = QtGui.QAction("&Export spectrum", self)
         export_spectrum_action.setShortcut("Ctrl+S")
         export_spectrum_action.triggered.connect(self.export_spectrum_dialog)
 
-        write_output_action = QtWidgets.QAction("&Write output files", self)
+        write_output_action = QtGui.QAction("&Write output files", self)
         write_output_action.setShortcut("Ctrl+O")
         write_output_action.triggered.connect(self.write_output_dialog)
 
@@ -219,7 +222,7 @@ class UserInterface(QtWidgets.QMainWindow):
     def _emit_value_changed_signal(self, widget):
         widget.valueChanged.emit(widget.value())
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def toggle_run_stop(self):
         if not self._is_running:
             self.start_run()
@@ -257,7 +260,7 @@ class UserInterface(QtWidgets.QMainWindow):
             self.write_info_file()
             self.close_output_file()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def start_scope_run(self):
         num_captures = self.num_captures_box.value()
         self.scope.set_up_buffers(self._num_samples, num_captures)
@@ -269,53 +272,53 @@ class UserInterface(QtWidgets.QMainWindow):
             callback=self.callback,
         )
 
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def set_range(self, range_idx):
         ranges = list(INPUT_RANGES.keys())
         self._range = ranges[range_idx]
         self.set_channel()
         self.set_trigger()
 
-    @QtCore.pyqtSlot(float)
+    @QtCore.Slot(float)
     def set_offset(self, offset_level):
         self._offset_level = offset_level
         self.set_channel()
         self.set_trigger()
 
-    @QtCore.pyqtSlot(float)
+    @QtCore.Slot(float)
     def set_threshold(self, threshold):
         self._threshold = threshold
         self.set_trigger()
 
-    @QtCore.pyqtSlot(float)
+    @QtCore.Slot(float)
     def set_upper_threshold(self, threshold):
         self._upper_threshold = threshold
         self.scope.stop()
 
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def set_trigger_state(self, state):
         self._is_trigger_enabled = state
         self.set_trigger()
 
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def set_upper_trigger_state(self, state):
         if not self._trigger_channel == "A OR B":
             self._is_upper_threshold_enabled = state
             self.scope.stop()
 
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def set_polarity(self, idx):
         self._pulse_polarity = self.POLARITY[idx]
         self._polarity_sign = self.POLARITY_SIGN[idx]
         self.set_channel()
         self.set_trigger()
 
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def set_coupling(self, idx):
         self._coupling = self.COUPLING[idx]
         self.set_channel()
 
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def set_baseline_correction_state(self, state):
         self._is_baseline_correction_enabled = state
 
@@ -360,19 +363,19 @@ class UserInterface(QtWidgets.QMainWindow):
             self.draw_spectrum_plot_guides()
         self.scope.stop()
 
-    @QtCore.pyqtSlot(int)
+    @QtCore.Slot(int)
     def set_timebase(self, timebase):
         self._timebase = timebase
         dt = self.scope.get_interval_from_timebase(timebase)
         self.sampling_time_label.setText(f"{dt / 1e3:.3f} μs")
         self._update_num_samples()
 
-    @QtCore.pyqtSlot(float)
+    @QtCore.Slot(float)
     def set_pre_trigger_window(self, pre_trigger_window):
         self._pre_trigger_window = pre_trigger_window * 1e3
         self._update_num_samples()
 
-    @QtCore.pyqtSlot(float)
+    @QtCore.Slot(float)
     def set_post_trigger_window(self, post_trigger_window):
         self._post_trigger_window = post_trigger_window * 1e3
         self._update_num_samples()
@@ -413,11 +416,11 @@ class UserInterface(QtWidgets.QMainWindow):
             status_message = ""
         self.label_status.setText(status_message)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def toggle_guides(self):
         self._show_guides = not self._show_guides
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def toggle_show_marks_or_lines(self):
         self._show_marks = not self._show_marks
         if self._show_marks:
@@ -425,7 +428,7 @@ class UserInterface(QtWidgets.QMainWindow):
         else:
             self._plot_options = PLOT_OPTIONS["lines"]
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def fetch_data(self):
         t, [A, B] = self.scope.get_data()
         if A is not None:
@@ -443,7 +446,7 @@ class UserInterface(QtWidgets.QMainWindow):
             run_time += time.time() - self._t_start_run
         return run_time >= self.run_duration_box.value()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def clear_run(self):
         self._t_prev_run_time = 0
         self._t_start_run = time.time()
@@ -453,7 +456,7 @@ class UserInterface(QtWidgets.QMainWindow):
         self._update_run_time_label()
         self.init_spectrum_plot()
 
-    @QtCore.pyqtSlot(dict)
+    @QtCore.Slot(dict)
     def plot_data(self, data):
         x, A, B = data["x"], data["A"], data["B"]
         times, baselines, pulseheights = [], [], []
@@ -506,7 +509,7 @@ class UserInterface(QtWidgets.QMainWindow):
             title="Scintillator event", bottom="Time [us]", left="Signal [V]"
         )
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def reset_event_axes(self):
         self.event_plot.enableAutoRange(axis=pg.ViewBox.XAxis)
         self.event_plot.setYRange(
@@ -565,7 +568,7 @@ class UserInterface(QtWidgets.QMainWindow):
             title="Spectrum", bottom="Pulseheight [mV]", left="Counts"
         )
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def reset_spectrum_axes(self):
         self.spectrum_plot.enableAutoRange()
 
