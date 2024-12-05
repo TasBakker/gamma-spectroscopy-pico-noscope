@@ -12,8 +12,10 @@ from pkg_resources import resource_filename
 from PySide6 import QtWidgets, QtCore
 import pyqtgraph as pg
 
-from gamma_spectroscopy.picoscope_5000a import PicoScope5000A, INPUT_RANGES
-from gamma_spectroscopy.fake_picoscope import FakePicoScope
+from Qt6_main_ui import Ui_MainWindow
+
+from gamma_spectroscopy.models.picoscope_5000a import PicoScope5000A, INPUT_RANGES
+from gamma_spectroscopy.models.fake_picoscope import FakePicoScope
 
 
 GUIDE_COLORS = {
@@ -130,7 +132,9 @@ class UserInterface(QtWidgets.QMainWindow):
         pg.setConfigOption("antialias", True)
 
         ui_path = resource_filename("gamma_spectroscopy", "gamma_spectroscopy_gui.ui")
-        layout = uic.loadUi(ui_path, self)
+        self.ui = Ui_MainWindow()
+        layout = self.ui
+        layout.setupUi(self)
 
         # Menubar
         menubar = QtWidgets.QMenuBar()

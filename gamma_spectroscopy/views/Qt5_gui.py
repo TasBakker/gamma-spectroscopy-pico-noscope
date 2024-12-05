@@ -12,8 +12,8 @@ from pkg_resources import resource_filename
 from PyQt5 import uic, QtWidgets, QtCore
 import pyqtgraph as pg
 
-from gamma_spectroscopy.picoscope_5000a import PicoScope5000A, INPUT_RANGES
-from gamma_spectroscopy.fake_picoscope import FakePicoScope
+from gamma_spectroscopy.models.picoscope_5000a import PicoScope5000A, INPUT_RANGES
+from gamma_spectroscopy.models.fake_picoscope import FakePicoScope
 
 
 GUIDE_COLORS = {
