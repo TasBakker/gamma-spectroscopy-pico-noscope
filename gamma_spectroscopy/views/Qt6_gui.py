@@ -9,7 +9,7 @@ import time
 import numpy as np
 from pkg_resources import resource_filename
 
-from PySide6 import ui, QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore
 import pyqtgraph as pg
 
 from gamma_spectroscopy.picoscope_5000a import PicoScope5000A, INPUT_RANGES
