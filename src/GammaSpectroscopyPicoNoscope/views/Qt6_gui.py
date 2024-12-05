@@ -7,7 +7,6 @@ from pathlib import Path
 import time
 
 import numpy as np
-from pkg_resources import resource_filename
 
 from PySide6 import QtWidgets, QtCore, QtGui
 import pyqtgraph as pg
@@ -135,8 +134,6 @@ class UserInterface(QtWidgets.QMainWindow):
         pg.setConfigOption("antialias", True)
 
         self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        layout = self.ui
 
         # Menubar
         menubar = QtWidgets.QMenuBar()
@@ -153,13 +150,15 @@ class UserInterface(QtWidgets.QMainWindow):
         file_menu.addAction(export_spectrum_action)
         file_menu.addAction(write_output_action)
 
-        layout.setMenuBar(menubar)
+        self.ui.menubar = menubar
 
         statusbar = QtWidgets.QStatusBar()
         self.label_status = QtWidgets.QLabel("")
         statusbar.addWidget(self.label_status)
 
-        layout.setStatusBar(statusbar)
+        self.ui.statusbar = statusbar
+
+        self.ui.setupUi(self)
 
         self.start_run_signal.connect(self.start_scope_run)
         self.start_run_signal.connect(self._update_run_label)
@@ -169,52 +168,56 @@ class UserInterface(QtWidgets.QMainWindow):
 
         self.plot_data_signal.connect(self.plot_data)
 
-        self.range_box.addItems(INPUT_RANGES.values())
-        self.range_box.currentIndexChanged.connect(self.set_range)
-        self.range_box.setCurrentIndex(5)
-        self.polarity_box.addItems(self.POLARITY)
-        self.polarity_box.currentIndexChanged.connect(self.set_polarity)
-        self._pulse_polarity = self.POLARITY[0]
-        self.coupling_box.addItems(self.COUPLING)
-        self.coupling_box.currentIndexChanged.connect(self.set_coupling)
-        self.offset_box.valueChanged.connect(self.set_offset)
-        self.threshold_box.valueChanged.connect(self.set_threshold)
-        self.upper_threshold_box.valueChanged.connect(self.set_upper_threshold)
-        self.trigger_box.stateChanged.connect(self.set_trigger_state)
-        self.upper_trigger_box.stateChanged.connect(self.set_upper_trigger_state)
-        self.trigger_channel_box.currentTextChanged.connect(self.set_trigger)
-        self.timebase_box.valueChanged.connect(self.set_timebase)
-        self.pre_trigger_box.valueChanged.connect(self.set_pre_trigger_window)
-        self.post_trigger_box.valueChanged.connect(self.set_post_trigger_window)
-        self.baseline_correction_box.stateChanged.connect(
+        self.ui.range_box.addItems(INPUT_RANGES.values())
+        self.ui.range_box.currentIndexChanged.connect(self.set_range)
+        self.ui.range_box.setCurrentIndex(5)
+        self.ui.polarity_box.addItems(self.POLARITY)
+        self.ui.polarity_box.currentIndexChanged.connect(self.set_polarity)
+        self.ui._pulse_polarity = self.POLARITY[0]
+        self.ui.coupling_box.addItems(self.COUPLING)
+        self.ui.coupling_box.currentIndexChanged.connect(self.set_coupling)
+        self.ui.offset_box.valueChanged.connect(self.set_offset)
+        self.ui.threshold_box.valueChanged.connect(self.set_threshold)
+        self.ui.upper_threshold_box.valueChanged.connect(self.set_upper_threshold)
+        self.ui.trigger_box.stateChanged.connect(self.set_trigger_state)
+        self.ui.upper_trigger_box.stateChanged.connect(self.set_upper_trigger_state)
+        self.ui.trigger_channel_box.currentTextChanged.connect(self.set_trigger)
+        self.ui.timebase_box.valueChanged.connect(self.set_timebase)
+        self.ui.pre_trigger_box.valueChanged.connect(self.set_pre_trigger_window)
+        self.ui.post_trigger_box.valueChanged.connect(self.set_post_trigger_window)
+        self.ui.baseline_correction_box.stateChanged.connect(
             self.set_baseline_correction_state
         )
 
-        self.lld_box.valueChanged.connect(self.update_spectrum_plot)
-        self.uld_box.valueChanged.connect(self.update_spectrum_plot)
-        self.num_bins_box.valueChanged.connect(self.update_spectrum_plot)
+        self.ui.lld_box.valueChanged.connect(self.update_spectrum_plot)
+        self.ui.uld_box.valueChanged.connect(self.update_spectrum_plot)
+        self.ui.num_bins_box.valueChanged.connect(self.update_spectrum_plot)
 
-        self.clear_run_button.clicked.connect(self.clear_run)
-        self.single_button.clicked.connect(self.start_scope_run)
-        self.run_stop_button.clicked.connect(self.toggle_run_stop)
+        self.ui.clear_run_button.clicked.connect(self.clear_run)
+        self.ui.single_button.clicked.connect(self.start_scope_run)
+        self.ui.run_stop_button.clicked.connect(self.toggle_run_stop)
 
-        self.reset_event_axes_button.clicked.connect(self.reset_event_axes)
-        self.reset_spectrum_axes_button.clicked.connect(self.reset_spectrum_axes)
-        self.toggle_guides_button1.clicked.connect(self.toggle_guides)
-        self.toggle_guides_button2.clicked.connect(self.toggle_guides)
-        self.toggle_markslines_button1.clicked.connect(self.toggle_show_marks_or_lines)
-        self.toggle_markslines_button2.clicked.connect(self.toggle_show_marks_or_lines)
+        self.ui.reset_event_axes_button.clicked.connect(self.reset_event_axes)
+        self.ui.reset_spectrum_axes_button.clicked.connect(self.reset_spectrum_axes)
+        self.ui.toggle_guides_button1.clicked.connect(self.toggle_guides)
+        self.ui.toggle_guides_button2.clicked.connect(self.toggle_guides)
+        self.ui.toggle_markslines_button1.clicked.connect(
+            self.toggle_show_marks_or_lines
+        )
+        self.ui.toggle_markslines_button2.clicked.connect(
+            self.toggle_show_marks_or_lines
+        )
 
         self.run_timer.timeout.connect(self._update_run_time_label)
 
         self.init_event_plot()
         self.init_spectrum_plot()
 
-        self._emit_value_changed_signal(self.offset_box)
-        self._emit_value_changed_signal(self.threshold_box)
-        self._emit_value_changed_signal(self.timebase_box)
-        self._emit_value_changed_signal(self.pre_trigger_box)
-        self._emit_value_changed_signal(self.post_trigger_box)
+        self._emit_value_changed_signal(self.ui.offset_box)
+        self._emit_value_changed_signal(self.ui.threshold_box)
+        self._emit_value_changed_signal(self.ui.timebase_box)
+        self._emit_value_changed_signal(self.ui.pre_trigger_box)
+        self._emit_value_changed_signal(self.ui.post_trigger_box)
 
         self.show()
 
@@ -236,8 +239,8 @@ class UserInterface(QtWidgets.QMainWindow):
             self._update_run_time_label()
             self.run_timer.start()
             self.start_run_signal.emit()
-            self.run_stop_button.setText("Stop")
-            self.single_button.setDisabled(True)
+            self.ui.run_stop_button.setText("Stop")
+            self.ui.single_button.setDisabled(True)
             self._update_run_label()
             if self._write_output:
                 self.open_output_file()
@@ -253,15 +256,15 @@ class UserInterface(QtWidgets.QMainWindow):
         self.run_timer.stop()
         self._run_time = time.time() - self._t_start_run
         self._t_prev_run_time += self._run_time
-        self.run_stop_button.setText("Run")
-        self.single_button.setDisabled(False)
+        self.ui.run_stop_button.setText("Run")
+        self.ui.single_button.setDisabled(False)
         if self._write_output:
             self.write_info_file()
             self.close_output_file()
 
     @QtCore.Slot()
     def start_scope_run(self):
-        num_captures = self.num_captures_box.value()
+        num_captures = self.ui.num_captures_box.value()
         self.scope.set_up_buffers(self._num_samples, num_captures)
         self.scope.start_run(
             self._pre_samples,
@@ -331,14 +334,14 @@ class UserInterface(QtWidgets.QMainWindow):
         self.scope.set_channel(
             "B", self._coupling, self._range, self._polarity_sign * self._offset
         )
-        self.event_plot.setYRange(
+        self.ui.event_plot.setYRange(
             -self._range - self._offset, self._range - self._offset
         )
         self.scope.stop()
 
     def set_trigger(self):
         edge = "RISING" if self._pulse_polarity == "Positive" else "FALLING"
-        if self.trigger_channel_box.currentText() == "A OR B":
+        if self.ui.trigger_channel_box.currentText() == "A OR B":
             self._trigger_channel = "A OR B"
             self.scope.set_trigger_A_OR_B(
                 self._polarity_sign * self._threshold,
@@ -346,10 +349,10 @@ class UserInterface(QtWidgets.QMainWindow):
                 is_enabled=self._is_trigger_enabled,
             )
             self._upper_trigger_state = False
-            self.upper_trigger_box.setCheckable(False)
+            self.ui.upper_trigger_box.setCheckable(False)
         else:
             # get last letter of trigger channel box ('Channel A' -> 'A')
-            channel = self.trigger_channel_box.currentText()[-1]
+            channel = self.ui.trigger_channel_box.currentText()[-1]
             self._trigger_channel = channel
             self.scope.set_trigger(
                 channel,
@@ -357,7 +360,7 @@ class UserInterface(QtWidgets.QMainWindow):
                 edge,
                 is_enabled=self._is_trigger_enabled,
             )
-            self.upper_trigger_box.setCheckable(True)
+            self.ui.upper_trigger_box.setCheckable(True)
         if self._show_guides:
             self.draw_spectrum_plot_guides()
         self.scope.stop()
@@ -366,7 +369,7 @@ class UserInterface(QtWidgets.QMainWindow):
     def set_timebase(self, timebase):
         self._timebase = timebase
         dt = self.scope.get_interval_from_timebase(timebase)
-        self.sampling_time_label.setText(f"{dt / 1e3:.3f} μs")
+        self.ui.sampling_time_label.setText(f"{dt / 1e3:.3f} μs")
         self._update_num_samples()
 
     @QtCore.Slot(float)
@@ -382,7 +385,7 @@ class UserInterface(QtWidgets.QMainWindow):
     def _update_num_samples(self):
         pre_samples, post_samples = self._calculate_num_samples()
         num_samples = pre_samples + post_samples
-        self.num_samples_label.setText(str(num_samples))
+        self.ui.num_samples_label.setText(str(num_samples))
 
         self._pre_samples = pre_samples
         self._post_samples = post_samples
@@ -398,15 +401,15 @@ class UserInterface(QtWidgets.QMainWindow):
 
     def _update_run_time_label(self):
         run_time = round(self._t_prev_run_time + time.time() - self._t_start_run)
-        self.run_time_label.setText(f"{run_time} s")
-        self.num_events_label.setText(f"({self.num_events} events)")
+        self.ui.run_time_label.setText(f"{run_time} s")
+        self.ui.num_events_label.setText(f"({self.num_events} events)")
         # Force repaint for fast response on user input
-        self.run_time_label.repaint()
-        self.num_events_label.repaint()
+        self.ui.run_time_label.repaint()
+        self.ui.num_events_label.repaint()
 
     def _update_run_label(self):
-        self.run_number_label.setText(f"{self._run_number}")
-        self.run_number_label.repaint()
+        self.ui.run_number_label.setText(f"{self._run_number}")
+        self.ui.run_number_label.repaint()
 
     def _update_status_bar(self):
         if self._write_output:
@@ -443,7 +446,7 @@ class UserInterface(QtWidgets.QMainWindow):
         run_time = self._t_prev_run_time
         if self._is_running:
             run_time += time.time() - self._t_start_run
-        return run_time >= self.run_duration_box.value()
+        return run_time >= self.ui.run_duration_box.value()
 
     @QtCore.Slot()
     def clear_run(self):
@@ -503,24 +506,24 @@ class UserInterface(QtWidgets.QMainWindow):
             self.update_spectrum_plot()
 
     def init_event_plot(self):
-        self.event_plot.clear()
-        self.event_plot.setLabels(
+        self.ui.event_plot.clear()
+        self.ui.event_plot.setLabels(
             title="Scintillator event", bottom="Time [us]", left="Signal [V]"
         )
 
     @QtCore.Slot()
     def reset_event_axes(self):
-        self.event_plot.enableAutoRange(axis=pg.ViewBox.XAxis)
-        self.event_plot.setYRange(
+        self.ui.event_plot.enableAutoRange(axis=pg.ViewBox.XAxis)
+        self.ui.event_plot.setYRange(
             -self._range - self._offset, self._range - self._offset
         )
 
     def update_event_plot(self, x, A, B, pulseheights, baselines):
-        self.event_plot.clear()
-        if self.ch_A_enabled_box.isChecked():
-            self.event_plot.plot(x * 1e6, A, **self._plot_options["A"])
-        if self.ch_B_enabled_box.isChecked():
-            self.event_plot.plot(x * 1e6, B, **self._plot_options["B"])
+        self.ui.event_plot.clear()
+        if self.ui.ch_A_enabled_box.isChecked():
+            self.ui.event_plot.plot(x * 1e6, A, **self._plot_options["A"])
+        if self.ui.ch_B_enabled_box.isChecked():
+            self.ui.event_plot.plot(x * 1e6, B, **self._plot_options["B"])
 
         if self._show_guides:
             self.draw_event_plot_guides(x, baselines, pulseheights)
@@ -528,13 +531,13 @@ class UserInterface(QtWidgets.QMainWindow):
     def draw_event_plot_guides(self, x, baselines, pulseheights):
         phA, phB = pulseheights
         blA, blB = baselines
-        plot = self.event_plot
+        plot = self.ui.event_plot
 
         # mark baselines and pulseheights
-        if self.ch_A_enabled_box.isChecked():
+        if self.ui.ch_A_enabled_box.isChecked():
             self.draw_guide(plot, blA, "blue")
             self.draw_guide(plot, phA / 1e3, "purple")
-        if self.ch_B_enabled_box.isChecked():
+        if self.ui.ch_B_enabled_box.isChecked():
             self.draw_guide(plot, blB, "blue")
             self.draw_guide(plot, phB / 1e3, "purple")
 
@@ -562,33 +565,33 @@ class UserInterface(QtWidgets.QMainWindow):
         )
 
     def init_spectrum_plot(self):
-        self.spectrum_plot.clear()
-        self.spectrum_plot.setLabels(
+        self.ui.spectrum_plot.clear()
+        self.ui.spectrum_plot.setLabels(
             title="Spectrum", bottom="Pulseheight [mV]", left="Counts"
         )
 
     @QtCore.Slot()
     def reset_spectrum_axes(self):
-        self.spectrum_plot.enableAutoRange()
+        self.ui.spectrum_plot.enableAutoRange()
 
     def update_spectrum_plot(self):
         if len(self._baselines["A"]) > 0:
-            self.spectrum_plot.clear()
+            self.ui.spectrum_plot.clear()
             x, bins, channel_counts = self.make_spectrum()
             for counts, channel in zip(channel_counts, ["A", "B"]):
                 if counts is not None:
-                    self.spectrum_plot.plot(x, counts, **self._plot_options[channel])
+                    self.ui.spectrum_plot.plot(x, counts, **self._plot_options[channel])
             if self._show_guides:
                 self.draw_spectrum_plot_guides()
 
     def make_spectrum(self):
         # xrange = 2 * self._range * 1e3
         xrange = (self._range - self._offset) * 1e3
-        xmin = 0.01 * self.lld_box.value() * xrange
-        xmax = 0.01 * self.uld_box.value() * xrange
+        xmin = 0.01 * self.ui.lld_box.value() * xrange
+        xmax = 0.01 * self.ui.uld_box.value() * xrange
         if xmax < xmin:
             xmax = xmin
-        bins = np.linspace(xmin, xmax, self.num_bins_box.value())
+        bins = np.linspace(xmin, xmax, self.ui.num_bins_box.value())
         x = (bins[:-1] + bins[1:]) / 2
         channel_counts = []
 
@@ -607,7 +610,7 @@ class UserInterface(QtWidgets.QMainWindow):
         min_blB = np.percentile(self._baselines["B"], 5)
         # max_blA = np.percentile(self._baselines['A'], 95)
         # max_blB = np.percentile(self._baselines['B'], 95)
-        plot = self.spectrum_plot
+        plot = self.ui.spectrum_plot
 
         if self._is_trigger_enabled:
             self.draw_guide(plot, self._threshold * 1e3, "green", "vertical")
@@ -619,7 +622,7 @@ class UserInterface(QtWidgets.QMainWindow):
             self.draw_guide(plot, self._upper_threshold * 1e3, "green", "vertical")
 
         if self._is_baseline_correction_enabled:
-            if self.ch_A_enabled_box.isChecked():
+            if self.ui.ch_A_enabled_box.isChecked():
                 lower_bound = self._threshold - min_blA
                 self.draw_guide(plot, lower_bound * 1e3, "purple", "vertical")
                 # REALLY think about these ones (only look for actual clipping?)
@@ -632,7 +635,7 @@ class UserInterface(QtWidgets.QMainWindow):
                 #     self.draw_guide(plot, upper_bound * 1e3, 'purple',
                 #                     'vertical')
 
-            if self.ch_B_enabled_box.isChecked():
+            if self.ui.ch_B_enabled_box.isChecked():
                 lower_bound = self._threshold - min_blB
                 self.draw_guide(plot, lower_bound * 1e3, "purple", "vertical")
                 # REALLY think about these ones (only look for actual clipping?)
