@@ -134,10 +134,9 @@ class UserInterface(QtWidgets.QMainWindow):
         pg.setConfigOption("foreground", "w")
         pg.setConfigOption("antialias", True)
 
-        ui_path = resource_filename("GammaSpectroscopyPicoNoscope", "Qt6_ui.ui")
         self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
         layout = self.ui
-        layout.setupUi(self)
 
         # Menubar
         menubar = QtWidgets.QMenuBar()

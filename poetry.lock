@@ -65,6 +65,20 @@ files = [
 ]
 
 [[package]]
+name = "picosdk"
+version = "1.1"
+description = "PicoSDK Python Wrappers"
+optional = false
+python-versions = "*"
+files = [
+    {file = "picosdk-1.1-py2.py3-none-any.whl", hash = "sha256:be0d51b3561f99b16f026990915f51c207b6e347bbb9ded1130466e40734a4db"},
+    {file = "picosdk-1.1.tar.gz", hash = "sha256:b6dc68f3a1ae6f044421bf728b8b6f38145403607006e9c014705559d914d6f1"},
+]
+
+[package.dependencies]
+numpy = ">=1.12.1"
+
+[[package]]
 name = "pyqtgraph"
 version = "0.13.7"
 description = "Scientific Graphics and GUI Library for Python"
@@ -145,4 +159,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.13,<3.14"
-content-hash = "24b70d55062b8dd9906376f78f6c37699675f9a430be5cb16327087d0ebefd8b"
+content-hash = "e42e42ea4cefd4adc88a3c5a894c99737f3d7875a3e47c66eca6fdd93a483dd6"
