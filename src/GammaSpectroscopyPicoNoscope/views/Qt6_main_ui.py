@@ -11,15 +11,16 @@
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
     QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
+    QCursor, QFont, QFontDatabase, QGradient,
+    QIcon, QImage, QKeySequence, QLinearGradient,
+    QPainter, QPalette, QPixmap, QRadialGradient,
+    QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBox,
     QFormLayout, QFrame, QHBoxLayout, QLabel,
-    QMainWindow, QMenuBar, QPushButton, QSizePolicy,
-    QSpacerItem, QSpinBox, QStatusBar, QTabWidget,
-    QVBoxLayout, QWidget)
+    QMainWindow, QMenu, QMenuBar, QPushButton,
+    QSizePolicy, QSpacerItem, QSpinBox, QStatusBar,
+    QTabWidget, QVBoxLayout, QWidget)
 
 from pyqtgraph import PlotWidget
 
@@ -28,6 +29,10 @@ class Ui_MainWindow(object):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(1169, 764)
+        self.actionExport_spectrum = QAction(MainWindow)
+        self.actionExport_spectrum.setObjectName(u"actionExport_spectrum")
+        self.actionWrite_output_files = QAction(MainWindow)
+        self.actionWrite_output_files.setObjectName(u"actionWrite_output_files")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.horizontalLayout_2 = QHBoxLayout(self.centralwidget)
@@ -152,6 +157,19 @@ class Ui_MainWindow(object):
         self.run_time_label.setMargin(0)
 
         self.horizontalLayout.addWidget(self.run_time_label)
+
+        self.label_17 = QLabel(self.centralwidget)
+        self.label_17.setObjectName(u"label_17")
+
+        self.horizontalLayout.addWidget(self.label_17)
+
+        self.measuring_time_label = QLabel(self.centralwidget)
+        self.measuring_time_label.setObjectName(u"measuring_time_label")
+        self.measuring_time_label.setMinimumSize(QSize(40, 0))
+        self.measuring_time_label.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.measuring_time_label.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+
+        self.horizontalLayout.addWidget(self.measuring_time_label)
 
         self.num_events_label = QLabel(self.centralwidget)
         self.num_events_label.setObjectName(u"num_events_label")
@@ -459,10 +477,16 @@ class Ui_MainWindow(object):
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
         self.menubar.setGeometry(QRect(0, 0, 1169, 22))
+        self.menuFile = QMenu(self.menubar)
+        self.menuFile.setObjectName(u"menuFile")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
+
+        self.menubar.addAction(self.menuFile.menuAction())
+        self.menuFile.addAction(self.actionExport_spectrum)
+        self.menuFile.addAction(self.actionWrite_output_files)
 
         self.retranslateUi(MainWindow)
 
@@ -474,6 +498,14 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Gamma Spectroscopy Qt6", None))
+        self.actionExport_spectrum.setText(QCoreApplication.translate("MainWindow", u"Export spectrum", None))
+#if QT_CONFIG(shortcut)
+        self.actionExport_spectrum.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+S", None))
+#endif // QT_CONFIG(shortcut)
+        self.actionWrite_output_files.setText(QCoreApplication.translate("MainWindow", u"Write output files", None))
+#if QT_CONFIG(shortcut)
+        self.actionWrite_output_files.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+O", None))
+#endif // QT_CONFIG(shortcut)
         self.reset_event_axes_button.setText(QCoreApplication.translate("MainWindow", u"Reset axes", None))
         self.toggle_guides_button1.setText(QCoreApplication.translate("MainWindow", u"Toggle guides", None))
         self.toggle_markslines_button1.setText(QCoreApplication.translate("MainWindow", u"Toggle marks/lines", None))
@@ -489,6 +521,8 @@ class Ui_MainWindow(object):
         self.run_number_label.setText(QCoreApplication.translate("MainWindow", u"0", None))
         self.label_12.setText(QCoreApplication.translate("MainWindow", u"Run time:", None))
         self.run_time_label.setText(QCoreApplication.translate("MainWindow", u"0 s", None))
+        self.label_17.setText(QCoreApplication.translate("MainWindow", u"Measuring time: ", None))
+        self.measuring_time_label.setText(QCoreApplication.translate("MainWindow", u"0 s", None))
         self.num_events_label.setText(QCoreApplication.translate("MainWindow", u"(0 events)", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Range:", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Offset:", None))
@@ -531,5 +565,6 @@ class Ui_MainWindow(object):
         self.label_10.setText(QCoreApplication.translate("MainWindow", u"Upper threshold (SW):", None))
         self.label_11.setText(QCoreApplication.translate("MainWindow", u"Run duration:", None))
         self.run_duration_box.setSuffix(QCoreApplication.translate("MainWindow", u" s", None))
+        self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
     # retranslateUi
 

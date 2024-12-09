@@ -101,6 +101,9 @@ class UserInterface(QtWidgets.QMainWindow):
     _t_start_run = 0
     _run_time = 0
     _t_prev_run_time = 0
+    _t_start_measuring = 0
+    _measuring_time = 0
+    _total_measuring_time = 0
 
     _write_output = False
     _output_path = Path.home() / "Documents"
@@ -132,30 +135,13 @@ class UserInterface(QtWidgets.QMainWindow):
 
         self.ui = Ui_MainWindow()
 
-        # Menubar
-        menubar = QtWidgets.QMenuBar()
-
-        export_spectrum_action = QtGui.QAction("&Export spectrum", self)
-        export_spectrum_action.setShortcut("Ctrl+S")
-        export_spectrum_action.triggered.connect(self.export_spectrum_dialog)
-
-        write_output_action = QtGui.QAction("&Write output files", self)
-        write_output_action.setShortcut("Ctrl+O")
-        write_output_action.triggered.connect(self.write_output_dialog)
-
-        file_menu = menubar.addMenu("&File")
-        file_menu.addAction(export_spectrum_action)
-        file_menu.addAction(write_output_action)
-
-        self.ui.menubar = menubar
-
-        statusbar = QtWidgets.QStatusBar()
-        self.label_status = QtWidgets.QLabel("")
-        statusbar.addWidget(self.label_status)
-
-        self.ui.statusbar = statusbar
-
         self.ui.setupUi(self)
+
+        self.label_status = QtWidgets.QLabel("")
+        self.ui.statusbar.addWidget(self.label_status)
+
+        self.ui.actionExport_spectrum.triggered.connect(self.export_spectrum_dialog)
+        self.ui.actionWrite_output_files.triggered.connect(self.write_output_dialog)
 
         self.start_run_signal.connect(self.start_scope_run)
         self.start_run_signal.connect(self._update_run_label)
@@ -263,6 +249,7 @@ class UserInterface(QtWidgets.QMainWindow):
     def start_scope_run(self):
         num_captures = self.ui.num_captures_box.value()
         self.scope.set_up_buffers(self._num_samples, num_captures)
+        self._t_start_measuring = time.perf_counter()
         self.scope.start_run(
             self._pre_samples,
             self._post_samples,
@@ -398,11 +385,14 @@ class UserInterface(QtWidgets.QMainWindow):
 
     def _update_run_time_label(self):
         run_time = round(self._t_prev_run_time + time.time() - self._t_start_run)
+        total_measuring_time = round(self._total_measuring_time)
         self.ui.run_time_label.setText(f"{run_time} s")
         self.ui.num_events_label.setText(f"({self.num_events} events)")
+        self.ui.measuring_time_label.setText(f"{total_measuring_time} s")
         # Force repaint for fast response on user input
         self.ui.run_time_label.repaint()
         self.ui.num_events_label.repaint()
+        self.ui.measuring_time_label.repaint()
 
     def _update_run_label(self):
         self.ui.run_number_label.setText(f"{self._run_number}")
@@ -429,6 +419,9 @@ class UserInterface(QtWidgets.QMainWindow):
 
     @QtCore.Slot()
     def fetch_data(self):
+        # end measurement time
+        self._measuring_time = time.perf_counter() - self._t_start_measuring
+        self._total_measuring_time += self._measuring_time
         t, [A, B] = self.scope.get_data()
         if A is not None:
             self.num_events += len(A)
@@ -449,6 +442,8 @@ class UserInterface(QtWidgets.QMainWindow):
     def clear_run(self):
         self._t_prev_run_time = 0
         self._t_start_run = time.time()
+        self._t_start_measuring = time.perf_counter()
+        self._total_measuring_time = 0
         self.num_events = 0
         self._pulseheights = {"A": [], "B": []}
         self._baselines = {"A": [], "B": []}
@@ -649,7 +644,7 @@ class UserInterface(QtWidgets.QMainWindow):
         """Dialog for exporting a data file."""
 
         file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, caption="Save spectrum", directory="spectrum.csv"
+            self, caption="Save spectrum", dir="spectrum.csv"
         )
         if not file_path:
             # Cancel was pressed, no file was selected
@@ -669,7 +664,7 @@ class UserInterface(QtWidgets.QMainWindow):
         file_path = QtWidgets.QFileDialog.getExistingDirectory(
             self,
             caption="Choose directory for output files",
-            directory=str(self._output_path.absolute()),
+            dir=str(self._output_path.absolute()),
         )
         self._output_path = Path(file_path)
         self._update_status_bar()
