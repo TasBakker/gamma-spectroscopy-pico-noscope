@@ -1,24 +1,21 @@
 import argparse
 import csv
 import ctypes
-from math import floor
 import sys
-from pathlib import Path
 import time
+from math import floor
+from pathlib import Path
 
 import numpy as np
-
-from PySide6 import QtWidgets, QtCore, QtGui
 import pyqtgraph as pg
+from PySide6 import QtCore, QtGui, QtWidgets
 
-from GammaSpectroscopyPicoNoscope.views.Qt6_main_ui import Ui_MainWindow
-
-from GammaSpectroscopyPicoNoscope.controllers.picoscope_5000a import (
-    PicoScope5000A,
-    INPUT_RANGES,
-)
 from GammaSpectroscopyPicoNoscope.controllers.fake_picoscope import FakePicoScope
-
+from GammaSpectroscopyPicoNoscope.controllers.picoscope_5000a import (
+    INPUT_RANGES,
+    PicoScope5000A,
+)
+from GammaSpectroscopyPicoNoscope.views.Qt6_main_ui import Ui_MainWindow
 
 GUIDE_COLORS = {
     "red": (255, 0, 0, 63),
@@ -731,15 +728,14 @@ class UserInterface(QtWidgets.QMainWindow):
 
 
 def main():
-    global qtapp
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--fake", action="store_true", help="Use fake hardware")
     args = parser.parse_args()
 
-    qtapp = QtWidgets.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     ui = UserInterface(use_fake=args.fake)
-    sys.exit(qtapp.exec_())
+    ui.show()
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":
